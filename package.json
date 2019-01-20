@@ -8,7 +8,9 @@
         "@octokit/webhooks": "^5.1.2",
         "@pulumi/cloud-aws": "latest",
         "@pulumi/pulumi": "latest",
-        "octonode": "^0.9.5"
+        "deepmerge": "^3.1.0",
+        "octonode": "^0.9.5",
+        "yamljs": "^0.3.0"
     },
     "devDependencies": {
         "jest": "^23.6.0",

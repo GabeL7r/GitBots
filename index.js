@@ -1,3 +1,5 @@
+const YAML = require('yamljs');
+const merge = require('deepmerge');
 const App = require('@octokit/app')
 const verify = require('@octokit/webhooks/verify')
 const blockWithLabels = require('./blockWithLabels.js');
@@ -33,6 +35,21 @@ function enrich(appName) {
             return res.status(500).json({message: 'Error creating github client'})
         }
 
+        req.getConfig = async function() {
+            const owner = this.body.repository.owner.login;
+            const repo = this.body.repository.name;
+            
+            const defaultConfig = await getContents({client: this.client, 'CodeSherpas', 'GitBots', path: `.github/${appName}.yml`})
+            const repoConfig = await getContents({ client: this.client, owner, repo, path: `.github/${appName}.yml` })
+
+            if(repoConfig.extends) {
+                const { owner, repo, path } = repoConfig.extends;
+                var extendedConfig = await getContents({client: this.client, owner, repo, path })
+            }
+
+            return merge.all([defaultConfig, repoConfig, extendedConfig]);
+        }
+       
         req.createReview = async function({pass, approveMsg, rejectMsg}) {
             let event = pass ? 'APPROVE' : 'REQUEST_CHANGES'
             let body = pass ? approveMsg : rejectMsg
@@ -58,6 +75,17 @@ function enrich(appName) {
     }
 }
 
+async function getContents( {client, owner, repo, path }) {
+    try {
+        const resp = await client.repo(`${owner}/${repo}`).contentsAsync(path)
+        return base64ToYaml(resp[0].content)
+    } catch(e) {
+        console.log(e)
+        console.log('Could not retrieve configs')
+        return {}
+    }
+}
+
 function validate(body, headers, appName) {
   const { secret } = config[appName];
   
@@ -68,5 +96,9 @@ function validate(body, headers, appName) {
   }
 }
 
+function base64ToYaml(string) {
+    const buff = new Buffer(string, 'base64');
+    return YAML.parse(buff.toString('ascii'));
+}
 
 exports.endpointJs = api.publish().url;

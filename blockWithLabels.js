@@ -1,11 +1,17 @@
 module.exports = { handle }
 
 async function handle(req, res) {
+    console.log('Getting config...')
+    const config = await req.getConfig();
+    console.log('Config is:', config)
+
+
+
     const labels = req.body.pull_request.labels;
 
     console.log('Labels: ', labels);
 
-    const blockingLabels = getBlockingLabels(labels, ['wip', 'do not merge']);
+    const blockingLabels = getBlockingLabels(labels, config.blocking);
     console.log('Blocking Labels: ', blockingLabels);
 
     const pass = !blockingLabels.length;
