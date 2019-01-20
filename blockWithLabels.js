@@ -40,14 +40,9 @@ async function handle(req, res) {
         
     }
 
-    const result = ghpr.createReview({event, body: prBody}, (err, res) => {
-        if (err) {
-            return res.status(500).json({err})
-        }
-        
-        return res.status(200)
-    
-    })
+    const result = await ghpr.createReviewAsync({event, body: prBody})
+
+    return res.status(200)
 
     // try {
     //     validate(req, 'checkMyPR')
