@@ -3,6 +3,7 @@ const verify = require('@octokit/webhooks/verify')
 const App = require('@octokit/app')
 const github = require('octonode');
 const config = require('./config.js');
+const { PullRequestApp } = require('./PullRequestApp.js');
 
 
 const APP_ID = 23917
@@ -29,44 +30,24 @@ async function handle(req, res) {
 
     const pass = !blockingLabels.length;
 
-    const app = new App({id:  APP_ID, privateKey})
-    const token = await app.getInstallationAccessToken({installationId: body.installation.id})
+    const rejectMsg = `Remove labels: ${blockingLabels.join(',')}`
 
-    const client = github.client(token)
+    const pullRequestApp = new PullRequestApp(body, APP_ID, privateKey)
 
-    const owner = body.repository.owner.login
-    const repo = body.repository.name
-    const number = body.pull_request.number
+    try {
+        console.log('Creating pull request client...')
+        await pullRequestApp.createClient()
 
-    const ghpr = client.pr(`${owner}/${repo}`, number)
+        console.log('Creating review on PR...')
+        const result = await pullRequestApp.createReview({ pass, rejectMsg })
 
-    let event, prBody;
-    if(pass) {
-        event = 'APPROVE'
-    } else {
-        event = 'REQUEST_CHANGES'
-        prBody = `Remove labels: ${blockingLabels.join(',')}`
-        
+        console.log('PR result: ', result)
+        console.log('Returning 200 status...')
+        return res.status(200).json({message: 'Created review on PR'})
+    } catch (e) {
+        console.log(e)
+        return res.status(500).json(e)
     }
-
-    const result = await ghpr.createReviewAsync({event, body: prBody})
-
-    return res.status(200)
-
-   
-    // return res.status(200).json({token: config.blockWithLabels});
-    // // const eventHandler = new EventHandler({
-    //     async transform (event) {
-    //         // optionally transform passed event before handlers are called
-    //         return event
-    //     }
-    // })
-
-    // eventHandler.receive({
-    //     id: req.headers['X-GitHub-Delivery'],
-    //     name: req.headers['X-GitHub-Event'],
-    //     payload: req.body
-    // })
 }
 
 function validate(body, headers, appName) {
