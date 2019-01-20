@@ -1,2 +1,4 @@
 config:
   aws:region: us-west-2
+  github-apps:blockWithLabels:
+    secure: AAABAJPIqfIz4FmX2dALnjfU7p1OrnMxH4UBF9RG12bQ5EoobOXZx2icpfTVGkogArSwfCfq+sIs8NxG4YBGH3VQYC4=

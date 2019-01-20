@@ -2,6 +2,7 @@ const EventHandler = require('@octokit/webhooks/event-handler');
 const verify = require('@octokit/webhooks/verify')
 const App = require('@octokit/app')
 const github = require('octonode');
+const config = require('./config.js');
 
 
 const APP_ID = 23917
@@ -11,6 +12,14 @@ module.exports = { handle }
 
 async function handle(req, res) {
 	const body = JSON.parse(req.body.toString('utf-8'))
+
+    try {
+        validate(body, req.headers, 'blockWithLabels')
+    } catch(e) {
+        console.error(e)
+        return res.status(401).json({message: 'Not authorized to make this request'});
+    }
+ 
     const labels = body.pull_request.labels;
 
     console.log('Labels: ', labels);
@@ -44,13 +53,7 @@ async function handle(req, res) {
 
     return res.status(200)
 
-    // try {
-    //     validate(req, 'checkMyPR')
-    // } catch(e) {
-    //     console.error(e)
-    //     return res.status(401).json({message: 'Not authorized to make this request'});
-    // }
-    
+   
     // return res.status(200).json({token: config.blockWithLabels});
     // // const eventHandler = new EventHandler({
     //     async transform (event) {
@@ -66,16 +69,12 @@ async function handle(req, res) {
     // })
 }
 
-function getOctokit(token) {
-    octokit.auth({type: 'token', token})
-}
-
-function validate(req, appName) {
+function validate(body, headers, appName) {
   const secret = config[appName];
   
   if (!secret) throw new Error("Secret not found for application");
 
-  if (!verify(secret, req.body, req.headers["x-hub-signature"])) {
+  if (!verify(secret, body, headers["x-hub-signature"])) {
     throw new Error("Signature does not match event payload and secert");
   }
 }
