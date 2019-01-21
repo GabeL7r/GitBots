@@ -39,15 +39,24 @@ function enrich(appName) {
             const owner = this.body.repository.owner.login;
             const repo = this.body.repository.name;
             
-            const defaultConfig = await getContents({client: this.client, 'CodeSherpas', 'GitBots', path: `.github/${appName}.yml`})
-            const repoConfig = await getContents({ client: this.client, owner, repo, path: `.github/${appName}.yml` })
 
-            if(repoConfig.extends) {
+            console.log('Getting repo config...')
+            const repoConfig = await getContents({ client: this.client, owner, repo, path: `.github/${appName}.yml` })
+            console.log('Repo config: ', repoConfig)
+
+            if(repoConfig && repoConfig.extends) {
                 const { owner, repo, path } = repoConfig.extends;
-                var extendedConfig = await getContents({client: this.client, owner, repo, path })
+                console.log('Getting extended config...')
+                const extendedConfig = await getContents({client: this.client, owner, repo, path })
+                console.log('Extended config: ', extendedConfig)
+                return merge.all([repoConfig, extendedConfig]);
+            } else {
+                console.log('Getting default config...')
+                const defaultConfig = await getContents({client: this.client, owner: 'CodeSherpas', repo: 'GitBots', path: `.github/${appName}.yml`})
+                console.log('Default config: ', defaultConfig)
+                return defaultConfig
             }
 
-            return merge.all([defaultConfig, repoConfig, extendedConfig]);
         }
        
         req.createReview = async function({pass, approveMsg, rejectMsg}) {
@@ -82,7 +91,7 @@ async function getContents( {client, owner, repo, path }) {
     } catch(e) {
         console.log(e)
         console.log('Could not retrieve configs')
-        return {}
+        return null
     }
 }
 

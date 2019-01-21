@@ -1,8 +1,12 @@
 module.exports = { handle }
 
 async function handle(req, res) {
+    console.log('Getting config...')
+    const config = await req.getConfig();
+    console.log('Config is:', config)
+
     try{
-        const regex = new RegExp('(feat|fix|docs|chore|style|refactor|perf|test): .*')
+        const regex = new RegExp(config.regex || '.*')
      
         const pass = regex.test(req.body.pull_request.title)
         const rejectMsg = `Title doesn't match regex: ${regex}`
