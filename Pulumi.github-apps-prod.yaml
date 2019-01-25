@@ -1,0 +1,6 @@
+config:
+  aws:region: us-west-2
+  github-apps:blockWithLabels:
+    secure: AAABALmGECKMVvZncJRsOkVXOm6RJbfs3NKRTTPzmRHR52nKqoT05CdCqiI5FfTxmDUeRjKclmyvb162BKreKYwZ5/k=
+  github-apps:titleLint:
+    secure: AAABAEPc7e0VwIRkSCBWI4LcnL2tR65oAJWZwA88Y9g5AVw0LFh4Sz8lGkGMZXzDI/POEQMObbJRMUUxY1mOZphIHj4=
