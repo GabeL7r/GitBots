@@ -1,11 +1,9 @@
-module.exports = { handle }
+module.exports = { handle, getBlockingLabels }
 
 async function handle(req, res) {
     console.log('Getting config...')
     const config = await req.getConfig();
     console.log('Config is:', config)
-
-
 
     const labels = req.body.pull_request.labels;
 

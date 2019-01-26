@@ -4,15 +4,18 @@ const App = require('@octokit/app')
 const verify = require('@octokit/webhooks/verify')
 const blockWithLabels = require('./blockWithLabels.js');
 const titleLint = require('./titleLint.js');
+const wip = require('./wip.js');
 const cloud = require("@pulumi/cloud-aws");
 let aws = require("@pulumi/aws");
+let pulumi = require("@pulumi/pulumi");
 const config = require('./config.js');
 const github = require('octonode');
 
-const api = new cloud.API("github-apps");
+const api = new cloud.API(pulumi.getStack());
 
 api.post("/github/block-with-labels", enrich('blockWithLabels'))
 api.post("/github/title-lint", enrich('titleLint'))
+api.post("/github/wip", enrich('wip'))
 
 function enrich(appName) {
     return async function(req, res) {
@@ -67,9 +70,24 @@ function enrich(appName) {
             const repo = this.body.repository.name;
             const number = this.body.pull_request.number
 
+            console.log(`Setting ${event} on ${repo}/${owner}`)
 
             return await this.client.pr(`${owner}/${repo}`, number).createReviewAsync({event, body})
         }
+
+        req.createStatus = async function({pass, approveMsg, rejectMsg, context}) {
+            let state = pass ? 'success' : 'failure'
+            let description = pass ? approveMsg : rejectMsg || ''
+
+            const owner = this.body.repository.owner.login;
+            const repo = this.body.repository.name;
+            const sha = this.body.pull_request.head.sha
+
+
+            console.log(`Setting ${state} on ${repo}/${owner}`)
+            return await this.client.repo(`${owner}/${repo}`).statusAsync(sha, {state, description, context})
+        }
+
 
         switch(appName) {
             case 'titleLint':
@@ -78,6 +96,9 @@ function enrich(appName) {
             case 'blockWithLabels':
                 console.log('Calling block with labels...')
                 return await blockWithLabels.handle(req,res)
+            case 'wip':
+                console.log('Calling wip...')
+                return await wip.handle(req,res)
             default:
                 return res.send(500).json({message: `Could not find app: ${appName}`})
         }

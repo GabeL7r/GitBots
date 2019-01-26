@@ -2,6 +2,7 @@
     "name": "hello-aws-javascript",
     "main": "index.js",
     "dependencies": {
+        "@codesherpas/title-lint": "^1.0.0",
         "@octokit/app": "^2.1.0",
         "@octokit/request": "^2.2.1",
         "@octokit/rest": "^16.8.1",

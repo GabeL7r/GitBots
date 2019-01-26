@@ -4,3 +4,5 @@ config:
     secure: AAABALmGECKMVvZncJRsOkVXOm6RJbfs3NKRTTPzmRHR52nKqoT05CdCqiI5FfTxmDUeRjKclmyvb162BKreKYwZ5/k=
   github-apps:titleLint:
     secure: AAABAEPc7e0VwIRkSCBWI4LcnL2tR65oAJWZwA88Y9g5AVw0LFh4Sz8lGkGMZXzDI/POEQMObbJRMUUxY1mOZphIHj4=
+  github-apps:wip:
+    secure: AAABAOyuxf2bM55Y6hmtURfUAjb+aqQGy2f50u8ijVEomDkqrZ43LkFZKdv3fe66mygA8Itn2dmSxj6yzO2qZ3Pvf7E=

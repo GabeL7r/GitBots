@@ -12,5 +12,11 @@ module.exports = {
         appId: 23917,
         privateKey: env.blockWithLabels,
         secret: config.require("blockWithLabels"),
+    },
+    wip: {
+        appId:24257,
+        privateKey: env.wip,
+        secret: config.require("wip")
+    
     }
 };
